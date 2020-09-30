@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <style>
+      #c {
+        background-color: black;
+      }
+    </style>
+  </head>
+  <body>
+    <div style="margin-left: 40%; margin-top = 30vh;">
+      <canvas id="c" width="320" height="480"></canvas>
+    </div>
+    <script>
+      let c = document.querySelector("#c");
+      let ctx = c.getContext("2d");
+      let x = c.width / 2;
+      let y = c.height - 30;
+      let dx = 2;
+      let dy = -2;
+      let ballRadius = 10;
+      let paddleHeight = 10;
+      let paddleWidth = 80;
+      let paddleX = c.width / 2;
+      let leftpress = false;
+      let rightpress = false;
+      let brickRow = 3;
+      let brickColumn = 5;
+      let brickWidth = 75;
+      let brickHeight = 20;
+      let brickPadding = 10;
+      let bricktop = 30;
+      let brickleft = 30;
+      let remaining = 0;
+      let bricks = [];
+
+      for (let i = 0; i < brickColumn; i++) {
+        bricks[i] = [];
+        for (let j = 0; j < brickRow; j++) {
+          bricks[i][j] = { x: 0, y: 0, status: 1 };
+        }
+      }
+
+      document.addEventListener("keydown", keydownHandler, false);
+      document.addEventListener("keyup", keyupHandler, false);
+
+      function keydownHandler(event) {
+        if (event.key == "Right" || event.key == "ArrowRight")
+          rightpress = true;
+        else if (event.key == "Left" || event.key == "ArrowLeft")
+          leftpress = true;
+      }
+
+      function keyupHandler(event) {
+        if (event.key == "ArrowRight") rightpress = false;
+        else if (event.key == "ArrowLeft") leftpress = false;
+      }
+      const drawScore = () => {
+        ctx.font = "16px Arial";
+        ctx.fillStyle = "#0095DD";
+        ctx.fillText("Score: " + remaining, 8, 20);
+      };
+
+      const collisionDetection = () => {
+        for (let i = 0; i < brickColumn; i++) {
+          for (let j = 0; j < brickRow; j++) {
+            let b = bricks[i][j];
+            if (b.status == 1) {
+              if (
+                x > b.x &&
+                x < b.x + brickWidth &&
+                y > b.y &&
+                y < b.y + brickHeight
+              ) {
+                dy = -dy;
+                b.status = 0;
+                remaining++;
+                if (remaining == brickRow * brickColumn) {
+                  alert("Jeet Gya bro");
+                  document.location.reload();
+                }
+              }
+            }
+          }
+        }
+      };
+      const drawBricks = () => {
+        for (let i = 0; i < brickColumn; i++) {
+          for (let j = 0; j < brickRow; j++) {
+            if (bricks[i][j].status == 1) {
+              let brickx = j * (brickWidth + brickPadding) + brickleft;
+              let bricky = i * (brickHeight + brickPadding) + bricktop;
+              bricks[i][j].x = brickx;
+              bricks[i][j].y = bricky;
+              ctx.beginPath();
+
+              ctx.rect(brickx, bricky, brickWidth, brickHeight);
+              ctx.fillStyle = "yellow";
+              ctx.fill();
+              ctx.closePath();
+            }
+          }
+        }
+      };
+      const drawPaddle = () => {
+        ctx.beginPath();
+        ctx.rect(paddleX, c.height - paddleHeight, paddleWidth, paddleHeight);
+        ctx.fillStyle = "green";
+        ctx.fill();
+        ctx.closePath();
+      };
+      const drawball = () => {
+        ctx.beginPath();
+        ctx.arc(x, y, ballRadius, 0, Math.PI * 2);
+        ctx.fillStyle = "red";
+        ctx.fill();
+        ctx.closePath();
+      };
+      const draw = () => {
+        ctx.clearRect(0, 0, c.width, c.height);
+        drawball();
+        drawPaddle();
+        drawBricks();
+        collisionDetection();
+        drawScore();
+        if (x + dx > c.width - ballRadius || x + dx < ballRadius) dx = -dx;
+        if (y + dy < ballRadius) dy = -dy;
+        else if (y + dy > c.height - ballRadius) {
+          if (x > paddleX && x < paddleX + paddleWidth) dy = -dy;
+          else {
+            alert("Haar Gya Bro");
+            document.location.reload();
+          }
+        }
+
+        if (rightpress == true) {
+          paddleX = paddleX + 5;
+          if (paddleX + paddleWidth > c.width) paddleX = c.width - paddleWidth;
+        }
+        if (leftpress == true) {
+          paddleX = paddleX - 5;
+          if (paddleX < 0) paddleX = 0;
+        }
+
+        x = x + dx;
+        y = y + dy;
+        requestAnimationFrame(draw);
+      };
+      draw();
+    </script>
+  </body>
+</html>
