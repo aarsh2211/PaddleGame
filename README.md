@@ -1,1 +1,1 @@
-Depolyed at www.paddler.surge.sh
+Deployed at www.paddler.surge.sh
